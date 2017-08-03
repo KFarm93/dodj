@@ -4,7 +4,8 @@ let startApp = () => {
   // Initialize the canvas & state
   app.canvas = document.getElementById('canvas');
   app.context = canvas.getContext('2d');
-  app.speed = 2;
+  app.starSpeed = 1.5;
+  app.wallSpeed = 3.5;
   app.removeStars = false;
   app.walls = [];
   app.score = 0;
@@ -102,14 +103,14 @@ class Wall {
   }
   move() {
     if (this.direction === 'up') {
-      this.position.y -= app.speed;
+      this.position.y -= app.wallSpeed;
       if (this.position.y <= -300) {
         let idx = app.walls.indexOf(this);
         app.walls.splice(idx, 1);
       }
     }
     else if (this.direction === 'left') {
-      this.position.x -= app.speed;
+      this.position.x -= app.wallSpeed;
       if (this.position.x <= -384) {
         let idx = app.walls.indexOf(this);
         app.walls.splice(idx, 1);
@@ -151,7 +152,7 @@ const frameUpdate = (timeStamp) => {
     app.player.move();
     drawScene();
     app.stars.forEach(function (star) {
-      star.position.x -= app.speed;
+      star.position.x -= app.starSpeed;
     })
     app.walls.forEach(function (wall) {
       wall.move();
