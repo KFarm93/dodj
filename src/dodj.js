@@ -1,11 +1,16 @@
+// Sound files
+let move = new Audio("../public/move.wav");
+let newWall = new Audio("../public/new_wall.wav");
+let death = new Audio("../public/death.wav");
+
+
+// App
 let app = {};
 
 let startApp = () => {
   // Initialize the canvas & state
   app.canvas = document.getElementById('canvas');
   app.context = canvas.getContext('2d');
-  app.starSpeed = 1.5;
-  app.wallSpeed = 3.5;
   app.removeStars = false;
   app.walls = [];
   app.score = 0;
@@ -39,13 +44,14 @@ class Player {
       y: app.canvas.height / 2
     },
     this.size = {
-      height: 60,
+      height: 50,
       width: 30
     },
     this.color = "#2694FE";
   }
   move() {
     if (this.moveUp) {
+      move.play();
       if (this.position.y > 31) {
         this.position.y -= 5;
       }
@@ -54,6 +60,7 @@ class Player {
       }
     }
     else if (this.moveDown) {
+      move.play();
       if (this.position.y < 569) {
         this.position.y += 5;
       }
@@ -62,6 +69,7 @@ class Player {
       }
     }
     else if (this.moveRight) {
+      move.play();
       if (this.position.x < 752) {
         this.position.x += 5;
       }
@@ -70,6 +78,7 @@ class Player {
       }
     }
     else if (this.moveLeft) {
+      move.play();
       if (this.position.x > 16) {
         this.position.x -= 5;
       }
@@ -87,7 +96,8 @@ class Star {
   constructor(position, size, color) {
     this.position = position,
     this.size = size,
-    this.color = color;
+    this.color = color,
+    this.speed = 1.5
   }
   drawMe(context) {
     drawObject(context, this);
@@ -99,18 +109,19 @@ class Wall {
     this.position = position,
     this.size = size,
     this.color = color,
-    this.direction = direction
+    this.direction = direction,
+    this.speed = 3.0
   }
   move() {
     if (this.direction === 'up') {
-      this.position.y -= app.wallSpeed;
+      this.position.y -= this.speed;
       if (this.position.y <= -300) {
         let idx = app.walls.indexOf(this);
         app.walls.splice(idx, 1);
       }
     }
     else if (this.direction === 'left') {
-      this.position.x -= app.wallSpeed;
+      this.position.x -= this.speed;
       if (this.position.x <= -384) {
         let idx = app.walls.indexOf(this);
         app.walls.splice(idx, 1);
@@ -128,7 +139,7 @@ const spawnPlayer = () => {
 
 const spawnInitialStars = () => {
   let i = 0;
-  while (i < 20) {
+  while (i < 175) {
     addStar({x: Math.random(true) * app.canvas.width, y: Math.random() * app.canvas.height}, {height: 4, width: 4}, "#FF0000");
     i++;
   }
@@ -152,18 +163,20 @@ const frameUpdate = (timeStamp) => {
     app.player.move();
     drawScene();
     app.stars.forEach(function (star) {
-      star.position.x -= app.starSpeed;
+      star.position.x -= star.speed;
     })
     app.walls.forEach(function (wall) {
       wall.move();
       if (wall.direction === 'up') {
         if (wall.position.x - 109 <= app.player.position.x && wall.position.x + 109 >= app.player.position.x) {
           if (wall.position.y - 330 <= app.player.position.y && wall.position.y + 330 >= app.player.position.y) {
+            death.play();
             app.gameOver = true;
           }
         }
         if (wall.position.y - 330 <= app.player.position.y && wall.position.y + 330 >= app.player.position.y) {
           if (wall.position.x - 109 <= app.player.position.x && wall.position.x + 109 >= app.player.position.x) {
+            death.play();
             app.gameOver = true;
           }
         }
@@ -171,11 +184,13 @@ const frameUpdate = (timeStamp) => {
       else if (wall.direction === 'left') {
         if (wall.position.x - 394 <= app.player.position.x && wall.position.x + 394 >= app.player.position.x) {
           if (wall.position.y - 98 <= app.player.position.y && wall.position.y + 98 >= app.player.position.y) {
+            death.play();
             app.gameOver = true;
           }
         }
         if (wall.position.y - 98 <= app.player.position.y && wall.position.y + 98 >= app.player.position.y) {
           if (wall.position.x - 394 <= app.player.position.x && wall.position.x + 394 >= app.player.position.x) {
+            death.play();
             app.gameOver = true;
           }
         }
@@ -183,7 +198,7 @@ const frameUpdate = (timeStamp) => {
     })
     addStarChance();
     addWallChance();
-    if (app.stars.length >= 200) {
+    if (app.stars.length >= 500) {
       app.removeStars = true;
     }
     if (app.removeStars === true) {
@@ -232,12 +247,14 @@ const addWall = () => {
     if (yPosition <= 40) {
       yPosition += 40;
     }
+    newWall.play();
     app.walls.push(new Wall({x: 1144.5, y: yPosition}, {height: 150, width: 768}, '#FE3527', direction));
   }
   else if (direction === 'up') {
     if (xPosition <= 40) {
       xPosition += 40;
     }
+    newWall.play();
     app.walls.push(new Wall({x: xPosition, y: 900}, {height: 600, width: 192}, '#FE3527', direction));
   }
 }
