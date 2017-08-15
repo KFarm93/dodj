@@ -16,6 +16,8 @@ let startApp = () => {
   app.score = 0;
   app.gameOver = false;
   app.dialogue = '';
+  app.formation = 4;
+  app.curveBall = false;
   setGame();
 
   // Listen for keyboard events
@@ -110,7 +112,7 @@ class Wall {
     this.size = size,
     this.color = color,
     this.direction = direction,
-    this.speed = 3.0
+    this.speed = 3.0;
   }
   move() {
     if (this.direction === 'up') {
@@ -217,7 +219,7 @@ const addStarChance = () => {
 
 const addWallChance = () => {
   let chance = Math.random();
-  if (chance >= 0.98 && app.walls.length <= 3) {
+  if (chance >= 0.98 && app.walls.length < 4) {
     addWall();
   }
 }
@@ -234,28 +236,57 @@ const addStar = (init) => {
 }
 
 const addWall = () => {
-  let direction = Math.random();
-  let xPosition = Math.random() * app.canvas.width;
-  let yPosition = Math.random() * app.canvas.height;
-  if (direction >= 0.5) {
-    direction = 'left';
+  let curveBallChance = Math.random();
+  if (curveBallChance < 0.1) {
+    app.curveBall = true;
+  }
+  if (app.formation === 1) {
+    newWall.play();
+    app.walls.push(new Wall({x: 1144.5, y: 75}, {height: 150, width: 768}, '#FE3527', 'left'));
+    app.walls.push(new Wall({x: 97.5, y: 900}, {height: 600, width: 195}, '#FE3527', 'up'));
+    if (app.curveBall === true) {
+      app.formation + 2;
+      app.curveBall = false;
+    }
+    else {
+      app.formation++;
+    }
+  }
+  else if (app.formation === 2) {
+    newWall.play();
+    app.walls.push(new Wall({x: 1144.5, y: 225}, {height: 150, width: 768}, '#FE3527', 'left'));
+    app.walls.push(new Wall({x: 292.5, y: 900}, {height: 600, width: 195}, '#FE3527', 'up'));
+    if (app.curveBall === true) {
+      app.formation + 2;
+      app.curveBall = false;
+    }
+    else {
+      app.formation++;
+    }
+  }
+  else if (app.formation === 3) {
+    newWall.play();
+    app.walls.push(new Wall({x: 1144.5, y: 375}, {height: 150, width: 768}, '#FE3527', 'left'));
+    app.walls.push(new Wall({x: 487.5, y: 900}, {height: 600, width: 195}, '#FE3527', 'up'));
+    if (app.curveBall === true) {
+      app.formation + 2;
+      app.curveBall = false;
+    }
+    else {
+      app.formation++;
+    }
   }
   else {
-    direction = 'up';
-  }
-  if (direction === 'left') {
-    if (yPosition <= 40) {
-      yPosition += 40;
-    }
     newWall.play();
-    app.walls.push(new Wall({x: 1144.5, y: yPosition}, {height: 150, width: 768}, '#FE3527', direction));
-  }
-  else if (direction === 'up') {
-    if (xPosition <= 40) {
-      xPosition += 40;
+    app.walls.push(new Wall({x: 1144.5, y: 525}, {height: 150, width: 768}, '#FE3527', 'left'));
+    app.walls.push(new Wall({x: 682.5, y: 900}, {height: 600, width: 195}, '#FE3527', 'up'));
+    if (app.curveBall === true) {
+      app.formation = 2;
+      app.curveBall = false;
     }
-    newWall.play();
-    app.walls.push(new Wall({x: xPosition, y: 900}, {height: 600, width: 192}, '#FE3527', direction));
+    else {
+      app.formation = 1;
+    }
   }
 }
 
