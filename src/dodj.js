@@ -3,45 +3,45 @@ let move = new Audio("../public/move.wav");
 let newWall = new Audio("../public/new_wall.wav");
 let death = new Audio("../public/death.wav");
 
+// Game Class
+class Game {
+  constructor(canvas) {
+    this.canvas = canvas;
+    this.context = canvas.getContext('2d');
+    this.removeStars = false;
+    this.walls = [];
+    this.stars = [];
+    this.gameOver = false;
+    this.dialogue = '';
+    this.score = 0;
+  }
+}
 
-// App
-let app = {};
+let canvas = document.getElementById('canvas');
+let game = new Game(canvas);
 
-let startApp = () => {
-  // Initialize the canvas & state
-  app.canvas = document.getElementById('canvas');
-  app.context = canvas.getContext('2d');
-  app.removeStars = false;
-  app.walls = [];
-  app.stars = [];
-  app.score = 0;
-  app.gameOver = false;
-  app.dialogue = '';
-  setGame();
+
+let startGame = () => {
+  spawnPlayer(game);
+  spawnInitialStars(game);
 
   // Listen for keyboard events
   window.addEventListener('keydown', myKeyDown);
   window.addEventListener('keyup', myKeyUp);
 
   // Update the game board
-  app.lastTime = window.performance.now();
+  game.lastTime = window.performance.now();
   window.requestAnimationFrame(frameUpdate);
 }
 
 
-// Set Game Function
-let setGame = () => {
-  spawnPlayer();
-  spawnInitialStars();
-}
 
-
-// Classes
+// Other Classes
 class Player {
-  constructor(position, size) {
+  constructor(game, position, size) {
     this.position = {
       x: 55,
-      y: app.canvas.height / 2
+      y: game.canvas.height / 2
     },
     this.size = {
       height: 50,
@@ -116,15 +116,15 @@ class Wall {
     if (this.direction === 'up') {
       this.position.y -= this.speed;
       if (this.position.y <= -300) {
-        let idx = app.walls.indexOf(this);
-        app.walls.splice(idx, 1);
+        let idx = game.walls.indexOf(this);
+        game.walls.splice(idx, 1);
       }
     }
     else if (this.direction === 'left') {
       this.position.x -= this.speed;
       if (this.position.x <= -384) {
-        let idx = app.walls.indexOf(this);
-        app.walls.splice(idx, 1);
+        let idx = game.walls.indexOf(this);
+        game.walls.splice(idx, 1);
       }
     }
   }
@@ -133,77 +133,78 @@ class Wall {
   }
 }
 
-const spawnPlayer = () => {
-  app.player = new Player();
+const spawnPlayer = (game) => {
+  game.player = new Player(game);
 }
 
-const spawnInitialStars = () => {
+const spawnInitialStars = (game) => {
   let i = 0;
   while (i < 175) {
-    addStar({x: Math.random(true) * app.canvas.width, y: Math.random() * app.canvas.height}, {height: 4, width: 4}, "#FF0000");
+    addStar({x: Math.random(true) * game.canvas.width, y: Math.random() * game.canvas.height}, {height: 4, width: 4}, "#FF0000");
     i++;
   }
 }
 
+
 const frameUpdate = (timeStamp) => {
-  $('#score').text('SCORE: ' + app.score);
-  $('#dialogue').text(app.dialogue);
-  if (app.gameOver === true) {
-    app.player.moveLeft = false;
-    app.player.moveRight = false;
-    app.player.moveUp = false;
-    app.player.moveDown = false;
-    app.dialogue = 'GAME OVER! (SPACEBAR TO PLAY AGAIN)';
+  $('#score').text('SCORE: ' + game.score);
+  $('#dialogue').text(game.dialogue);
+  if (game.gameOver === true) {
+    game.player.moveLeft = false;
+    game.player.moveRight = false;
+    game.player.moveUp = false;
+    game.player.moveDown = false;
+    game.dialogue = 'GAME OVER! (SPACEBAR TO PLAY AGAIN)';
     window.requestAnimationFrame(frameUpdate);
   }
   else {
-    app.score++;
+    game.score++;
     window.requestAnimationFrame(frameUpdate);
-    app.lastTime = timeStamp;
-    app.player.move();
+    game.lastTime = timeStamp;
+    game.player.move();
     drawScene();
-    app.stars.forEach(function (star) {
+    game.stars.forEach(function (star) {
       star.position.x -= star.speed;
     })
-    app.walls.forEach(function (wall) {
+    game.walls.forEach(function (wall) {
       wall.move();
       if (wall.direction === 'up') {
-        if (wall.position.x - 109 <= app.player.position.x && wall.position.x + 109 >= app.player.position.x) {
-          if (wall.position.y - 330 <= app.player.position.y && wall.position.y + 330 >= app.player.position.y) {
+        if (wall.position.x - 109 <= game.player.position.x && wall.position.x + 109 >= game.player.position.x) {
+          if (wall.position.y - 330 <= game.player.position.y && wall.position.y + 330 >= game.player.position.y) {
             death.play();
-            app.gameOver = true;
+            game.gameOver = true;
           }
         }
-        if (wall.position.y - 330 <= app.player.position.y && wall.position.y + 330 >= app.player.position.y) {
-          if (wall.position.x - 109 <= app.player.position.x && wall.position.x + 109 >= app.player.position.x) {
+        if (wall.position.y - 330 <= game.player.position.y && wall.position.y + 330 >= game.player.position.y) {
+          if (wall.position.x - 109 <= game.player.position.x && wall.position.x + 109 >= game.player.position.x) {
             death.play();
-            app.gameOver = true;
+            game.gameOver = true;
           }
         }
       }
       else if (wall.direction === 'left') {
-        if (wall.position.x - 394 <= app.player.position.x && wall.position.x + 394 >= app.player.position.x) {
-          if (wall.position.y - 98 <= app.player.position.y && wall.position.y + 98 >= app.player.position.y) {
+        if (wall.position.x - 394 <= game.player.position.x && wall.position.x + 394 >= game.player.position.x) {
+          if (wall.position.y - 98 <= game.player.position.y && wall.position.y + 98 >= game.player.position.y) {
             death.play();
-            app.gameOver = true;
+            game.gameOver = true;
           }
         }
-        if (wall.position.y - 98 <= app.player.position.y && wall.position.y + 98 >= app.player.position.y) {
-          if (wall.position.x - 394 <= app.player.position.x && wall.position.x + 394 >= app.player.position.x) {
+        if (wall.position.y - 98 <= game.player.position.y && wall.position.y + 98 >= game.player.position.y) {
+          if (wall.position.x - 394 <= game.player.position.x && wall.position.x + 394 >= game.player.position.x) {
             death.play();
-            app.gameOver = true;
+            game.gameOver = true;
           }
         }
       }
     })
     addStarChance();
     addWallChance();
-    if (app.stars.length >= 500) {
-      app.removeStars = true;
+    if (game.stars.length >= 500) {
+      game.removeStars = true;
     }
-    if (app.removeStars === true) {
-      app.stars = app.stars.slice(app.stars.length / 2, app.stars.length);
-      app.removeStars = false;
+    if (game.removeStars === true) {
+      game.stars = game.stars.slice(game.stars.length / 2, game.stars.length);
+      game.removeStars = false;
     }
   }
 }
@@ -216,19 +217,19 @@ const addStarChance = () => {
 }
 
 const addWallChance = () => {
-  if (app.walls.length <= 2) {
+  if (game.walls.length <= 2) {
     addWall();
   }
 }
 
 const addStar = (init) => {
   if (init === false) {
-    let newStar = new Star({x: 763, y: Math.random() * app.canvas.height}, {height: 4, width: 4}, "#FFFFFF");
-    app.stars.push(newStar);
+    let newStar = new Star({x: 763, y: Math.random() * 600}, {height: 4, width: 4}, "#FFFFFF");
+    game.stars.push(newStar);
   }
   else {
-    let newStar = new Star({x: Math.random() * app.canvas.width, y: Math.random() * app.canvas.height}, {height: 4, width: 4}, "#FFFFFF");
-    app.stars.push(newStar);
+    let newStar = new Star({x: Math.random() * 780, y: Math.random() * 600}, {height: 4, width: 4}, "#FFFFFF");
+    game.stars.push(newStar);
   }
 }
 
@@ -258,30 +259,30 @@ const addWall = () => {
   }
   if (direction == 'left') {
     newWall.play();
-    app.walls.push(new Wall({x: 1144.5, y: getRandomCoords('left')}, {height: 150, width: 780}, 'left'));
+    game.walls.push(new Wall({x: 1144.5, y: getRandomCoords('left')}, {height: 150, width: 780}, 'left'));
   }
   else {
     newWall.play();
-    app.walls.push(new Wall({x: getRandomCoords('up'), y: 900}, {height: 600, width: 195}, 'up'));
+    game.walls.push(new Wall({x: getRandomCoords('up'), y: 900}, {height: 600, width: 195}, 'up'));
   }
 }
 
 const drawScene = () => {
-  app.context.fillStyle = '#000020';
-  app.context.fillRect(0, 0, app.canvas.width, app.canvas.height);
-  app.player.drawMe(app.context);
-  app.stars.forEach(function (star) {
-    star.drawMe(app.context);
+  game.context.fillStyle = '#000020';
+  game.context.fillRect(0, 0, game.canvas.width, game.canvas.height);
+  game.player.drawMe(game.context);
+  game.stars.forEach(function (star) {
+    star.drawMe(game.context);
   })
-  app.walls.forEach(function (wall) {
-    wall.drawMe(app.context);
+  game.walls.forEach(function (wall) {
+    wall.drawMe(game.context);
   })
 }
 
 
 // Key Down/Up
 const myKeyDown = (e) => {
-  if (app.gameOver === true) {
+  if (game.gameOver === true) {
     switch(e.keyCode) {
       case 32:
         resetGame();
@@ -306,7 +307,7 @@ const myKeyDown = (e) => {
 }
 
 const myKeyUp = (e) => {
-  if (app.gameOver === true) {
+  if (game.gameOver === true) {
     // do nothing
   }
   else {
@@ -330,50 +331,50 @@ const myKeyUp = (e) => {
 
 // Key Handlers
 const upKeyDownHandler = () => {
-  app.player.moveUp = true;
+  game.player.moveUp = true;
 }
 
 const downKeyDownHandler = () => {
-  app.player.moveDown = true;
+  game.player.moveDown = true;
 }
 
 const rightKeyDownHandler = () => {
-  app.player.moveRight = true;
+  game.player.moveRight = true;
 }
 
 const leftKeyDownHandler = () => {
-  app.player.moveLeft = true;
+  game.player.moveLeft = true;
 }
 
 const upKeyUpHandler = () => {
-  app.player.moveUp = false;
+  game.player.moveUp = false;
 }
 
 const downKeyUpHandler = () => {
-  app.player.moveDown = false;
+  game.player.moveDown = false;
 }
 
 const rightKeyUpHandler = () => {
-  app.player.moveRight = false;
+  game.player.moveRight = false;
 }
 
 const leftKeyUpHandler = () => {
-  app.player.moveLeft = false;
+  game.player.moveLeft = false;
 }
 
 
 // Reset Game Function
 const resetGame = () => {
-  app.gameOver = false;
-  app.dialogue = '';
-  app.score = 0;
-  app.player.position.x = 55;
-  app.player.position.y = 300;
-  app.stars = [];
+  game.gameOver = false;
+  game.dialogue = '';
+  game.score = 0;
+  game.player.position.x = 55;
+  game.player.position.y = 300;
+  game.stars = [];
   spawnInitialStars();
-  app.walls = [];
-  app.player.moveLeft = false;
-  app.player.moveRight = false;
-  app.player.moveUp = false;
-  app.player.moveDown = false;
+  game.walls = [];
+  game.player.moveLeft = false;
+  game.player.moveRight = false;
+  game.player.moveUp = false;
+  game.player.moveDown = false;
 }
