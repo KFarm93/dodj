@@ -1,6 +1,9 @@
 // Sound files
 let move = new Audio("../public/move.wav");
-let newWall = new Audio("../public/new_wall.wav");
+let newWallVerySlow = new Audio("../public/new_wall_vs.wav");
+let newWallSlow = new Audio("../public/new_wall_s.wav");
+let newWallFast = new Audio("../public/new_wall_f.wav");
+let newWallVeryFast = new Audio("../public/new_wall_vf");
 let death = new Audio("../public/death.wav");
 
 // Classes
@@ -75,20 +78,48 @@ class Game {
   }
   spawnInitialStars() {
     let i = 0;
+    let initStarColor;
     while (i < 175) {
-      this.addStar({x: Math.random() * this.canvas.width, y: Math.random() * this.canvas.height}, {height: 4, width: 4}, "#FF0000");
+      let initStarColorChance = Math.random();
+      if (initStarColorChance >= .75) {
+        initStarColor = "#BAFFBA";
+      }
+      else if (initStarColorChance >= .50) {
+        initStarColor = "#FFFFFF";
+      }
+      else if (initStarColorChance >= .25) {
+        initStarColor = "#FFFF00";
+      }
+      else {
+        initStarColor = "#00FFFF"
+      }
+      let initStar = new Star({x: Math.random() * this.canvas.width, y: Math.random() * this.canvas.height}, {height: 4, width: 4}, initStarColor);
+      this.stars.push(initStar);
       i++;
     }
   }
   addStar() {
-    if (this.init === true) {
-      let newStar = new Star({x: 763, y: Math.random() * 600}, {height: 4, width: 4}, "#FFFFFF");
-      this.stars.push(newStar);
-      this.init = false;
+    let starColor;
+    let starColorChance = Math.random();
+    if (starColorChance >= .75) {
+      starColor = "#BAFFBA";
+    }
+    else if (starColorChance >= .50) {
+      starColor = "#FFFFFF";
+    }
+    else if (starColorChance >= .25) {
+      starColor = "#FFFF00";
     }
     else {
-      let newStar = new Star({x: Math.random() * 780, y: Math.random() * 600}, {height: 4, width: 4}, "#FFFFFF");
-      this.stars.push(newStar);
+      starColor = "#00FFFF";
+    }
+    let newStar = new Star({x: 763, y: Math.random() * 600}, {height: 4, width: 4}, starColor);
+    this.stars.push(newStar);
+  }
+  addStarChance() {
+    let chance = Math.random();
+    if (chance >= 0.8) {
+      this.addStar();
     }
   }
 }
@@ -202,7 +233,7 @@ const frameUpdate = (timeStamp) => {
         }
       }
     })
-    addStarChance();
+    game.addStarChance();
     addWallChance();
     if (game.stars.length >= 600) {
       game.removeStars = true;
@@ -214,27 +245,9 @@ const frameUpdate = (timeStamp) => {
   }
 }
 
-const addStarChance = () => {
-  let chance = Math.random();
-  if (chance >= 0.8) {
-    addStar(false);
-  }
-}
-
 const addWallChance = () => {
   if (game.walls.length <= 2) {
     addWall();
-  }
-}
-
-const addStar = (init) => {
-  if (init === false) {
-    let newStar = new Star({x: 763, y: Math.random() * 600}, {height: 4, width: 4}, "#FFFFFF");
-    game.stars.push(newStar);
-  }
-  else {
-    let newStar = new Star({x: Math.random() * 780, y: Math.random() * 600}, {height: 4, width: 4}, "#FFFFFF");
-    game.stars.push(newStar);
   }
 }
 
@@ -267,25 +280,27 @@ const addWall = () => {
   if (speedChance >= .75) {
     // very fast wall
     speed = 5.0;
+    newWallVeryFast.play();
   }
   else if (speedChance >= .50) {
     // fast wall
     speed = 4.0;
+    newWallFast.play();
   }
   else if (speedChance >= .25) {
     //slow wall
     speed = 3.0;
+    newWallSlow.play();
   }
   else {
     // very slow wall
     speed = 2.0;
+    newWallVerySlow.play();
   }
   if (direction == 'left') {
-    newWall.play();
     game.walls.push(new Wall({x: 1144.5, y: getRandomCoords('left')}, {height: 150, width: 780}, 'left', speed));
   }
   else {
-    newWall.play();
     game.walls.push(new Wall({x: getRandomCoords('up'), y: 900}, {height: 600, width: 195}, 'up', speed));
   }
 }
