@@ -3,42 +3,9 @@ let move = new Audio("../public/move.wav");
 let newWall = new Audio("../public/new_wall.wav");
 let death = new Audio("../public/death.wav");
 
-// Game Class
-class Game {
-  constructor(canvas) {
-    this.canvas = canvas;
-    this.context = canvas.getContext('2d');
-    this.removeStars = false;
-    this.walls = [];
-    this.stars = [];
-    this.gameOver = false;
-    this.dialogue = '';
-    this.score = 0;
-  }
-}
-
-let canvas = document.getElementById('canvas');
-let game = new Game(canvas);
-
-
-let startGame = () => {
-  spawnPlayer(game);
-  spawnInitialStars(game);
-
-  // Listen for keyboard events
-  window.addEventListener('keydown', myKeyDown);
-  window.addEventListener('keyup', myKeyUp);
-
-  // Update the game board
-  game.lastTime = window.performance.now();
-  window.requestAnimationFrame(frameUpdate);
-}
-
-
-
-// Other Classes
+// Classes
 class Player {
-  constructor(game, position, size) {
+  constructor(game) {
     this.position = {
       x: 55,
       y: game.canvas.height / 2
@@ -92,6 +59,40 @@ class Player {
   }
 }
 
+// Game Class
+class Game {
+  constructor(canvas) {
+    this.canvas = canvas;
+    this.context = canvas.getContext('2d');
+    this.removeStars = false;
+    this.walls = [];
+    this.stars = [];
+    this.gameOver = false;
+    this.dialogue = '';
+    this.score = 0;
+    this.player = new Player(this);
+    this.init = true;
+  }
+  spawnInitialStars() {
+    let i = 0;
+    while (i < 175) {
+      this.addStar({x: Math.random() * this.canvas.width, y: Math.random() * this.canvas.height}, {height: 4, width: 4}, "#FF0000");
+      i++;
+    }
+  }
+  addStar() {
+    if (this.init === true) {
+      let newStar = new Star({x: 763, y: Math.random() * 600}, {height: 4, width: 4}, "#FFFFFF");
+      this.stars.push(newStar);
+      this.init = false;
+    }
+    else {
+      let newStar = new Star({x: Math.random() * 780, y: Math.random() * 600}, {height: 4, width: 4}, "#FFFFFF");
+      this.stars.push(newStar);
+    }
+  }
+}
+
 class Star {
   constructor(position, size, color) {
     this.position = position,
@@ -105,12 +106,12 @@ class Star {
 }
 
 class Wall {
-  constructor(position, size, direction) {
+  constructor(position, size, direction, speed) {
     this.position = position,
     this.size = size,
     this.color = '#FF4500',
     this.direction = direction,
-    this.speed = 4.0;
+    this.speed = speed;
   }
   move() {
     if (this.direction === 'up') {
@@ -133,16 +134,20 @@ class Wall {
   }
 }
 
-const spawnPlayer = (game) => {
-  game.player = new Player(game);
-}
+let canvas = document.getElementById('canvas');
+let game = new Game(canvas);
 
-const spawnInitialStars = (game) => {
-  let i = 0;
-  while (i < 175) {
-    addStar({x: Math.random(true) * game.canvas.width, y: Math.random() * game.canvas.height}, {height: 4, width: 4}, "#FF0000");
-    i++;
-  }
+
+let startGame = () => {
+  game.spawnInitialStars();
+
+  // Listen for keyboard events
+  window.addEventListener('keydown', myKeyDown);
+  window.addEventListener('keyup', myKeyUp);
+
+  // Update the game board
+  game.lastTime = window.performance.now();
+  window.requestAnimationFrame(frameUpdate);
 }
 
 
@@ -199,7 +204,7 @@ const frameUpdate = (timeStamp) => {
     })
     addStarChance();
     addWallChance();
-    if (game.stars.length >= 500) {
+    if (game.stars.length >= 600) {
       game.removeStars = true;
     }
     if (game.removeStars === true) {
@@ -249,21 +254,39 @@ const getRandomCoords = (direction) => {
 }
 
 const addWall = () => {
-  let chance = Math.random();
+  let directionChance = Math.random();
+  let speedChance = Math.random();
   let direction;
-  if (chance >= .5) {
+  let speed;
+  if (directionChance >= .5) {
     direction = 'left';
   }
   else {
     direction = 'up';
   }
+  if (speedChance >= .75) {
+    // very fast wall
+    speed = 5.0;
+  }
+  else if (speedChance >= .50) {
+    // fast wall
+    speed = 4.0;
+  }
+  else if (speedChance >= .25) {
+    //slow wall
+    speed = 3.0;
+  }
+  else {
+    // very slow wall
+    speed = 2.0;
+  }
   if (direction == 'left') {
     newWall.play();
-    game.walls.push(new Wall({x: 1144.5, y: getRandomCoords('left')}, {height: 150, width: 780}, 'left'));
+    game.walls.push(new Wall({x: 1144.5, y: getRandomCoords('left')}, {height: 150, width: 780}, 'left', speed));
   }
   else {
     newWall.play();
-    game.walls.push(new Wall({x: getRandomCoords('up'), y: 900}, {height: 600, width: 195}, 'up'));
+    game.walls.push(new Wall({x: getRandomCoords('up'), y: 900}, {height: 600, width: 195}, 'up', speed));
   }
 }
 
@@ -371,7 +394,7 @@ const resetGame = () => {
   game.player.position.x = 55;
   game.player.position.y = 300;
   game.stars = [];
-  spawnInitialStars();
+  game.spawnInitialStars();
   game.walls = [];
   game.player.moveLeft = false;
   game.player.moveRight = false;
