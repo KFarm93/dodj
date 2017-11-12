@@ -105,10 +105,10 @@ class Star {
 }
 
 class Wall {
-  constructor(position, size, color, direction) {
+  constructor(position, size, direction) {
     this.position = position,
     this.size = size,
-    this.color = color,
+    this.color = '#FF4500',
     this.direction = direction,
     this.speed = 4.0;
   }
@@ -258,11 +258,11 @@ const addWall = () => {
   }
   if (direction == 'left') {
     newWall.play();
-    app.walls.push(new Wall({x: 1144.5, y: getRandomCoords('left')}, {height: 150, width: 780}, '#FF4500', 'left'));
+    app.walls.push(new Wall({x: 1144.5, y: getRandomCoords('left')}, {height: 150, width: 780}, 'left'));
   }
   else {
     newWall.play();
-    app.walls.push(new Wall({x: getRandomCoords('up'), y: 900}, {height: 600, width: 195}, '#FF4500', 'up'));
+    app.walls.push(new Wall({x: getRandomCoords('up'), y: 900}, {height: 600, width: 195}, 'up'));
   }
 }
 
