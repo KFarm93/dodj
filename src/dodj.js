@@ -13,11 +13,10 @@ let startApp = () => {
   app.context = canvas.getContext('2d');
   app.removeStars = false;
   app.walls = [];
+  app.stars = [];
   app.score = 0;
   app.gameOver = false;
   app.dialogue = '';
-  app.formation = 4;
-  app.curveBall = false;
   setGame();
 
   // Listen for keyboard events
@@ -33,7 +32,6 @@ let startApp = () => {
 // Set Game Function
 let setGame = () => {
   spawnPlayer();
-  app.stars = [];
   spawnInitialStars();
 }
 
@@ -112,7 +110,7 @@ class Wall {
     this.size = size,
     this.color = color,
     this.direction = direction,
-    this.speed = 3.0;
+    this.speed = 4.0;
   }
   move() {
     if (this.direction === 'up') {
@@ -218,15 +216,14 @@ const addStarChance = () => {
 }
 
 const addWallChance = () => {
-  let chance = Math.random();
-  if (chance >= 0.98 && app.walls.length < 4) {
+  if (app.walls.length <= 2) {
     addWall();
   }
 }
 
 const addStar = (init) => {
   if (init === false) {
-    let newStar = new Star({x: 763, y: Math.random() * app.canvas.height}, {height: 4, width: 4}, "#E4FFFF");
+    let newStar = new Star({x: 763, y: Math.random() * app.canvas.height}, {height: 4, width: 4}, "#FFFFFF");
     app.stars.push(newStar);
   }
   else {
@@ -235,58 +232,37 @@ const addStar = (init) => {
   }
 }
 
+const getRandomCoords = (direction) => {
+  let min;
+  let max;
+  if (direction == 'left') {
+    min = Math.ceil(75);
+    max = Math.floor(525);
+    return Math.floor(Math.random() * (max - min)) + min;
+  }
+  else if (direction == 'up') {
+    min = Math.ceil(97.5);
+    max = Math.floor(682.5);
+    return Math.floor(Math.random() * (max - min)) + min;
+  }
+}
+
 const addWall = () => {
-  let curveBallChance = Math.random();
-  if (curveBallChance < 0.1) {
-    app.curveBall = true;
+  let chance = Math.random();
+  let direction;
+  if (chance >= .5) {
+    direction = 'left';
   }
-  if (app.formation === 1) {
-    newWall.play();
-    app.walls.push(new Wall({x: 1144.5, y: 75}, {height: 150, width: 768}, '#FE3527', 'left'));
-    app.walls.push(new Wall({x: 97.5, y: 900}, {height: 600, width: 195}, '#FE3527', 'up'));
-    if (app.curveBall === true) {
-      app.formation + 2;
-      app.curveBall = false;
-    }
-    else {
-      app.formation++;
-    }
+  else {
+    direction = 'up';
   }
-  else if (app.formation === 2) {
+  if (direction == 'left') {
     newWall.play();
-    app.walls.push(new Wall({x: 1144.5, y: 225}, {height: 150, width: 768}, '#FE3527', 'left'));
-    app.walls.push(new Wall({x: 292.5, y: 900}, {height: 600, width: 195}, '#FE3527', 'up'));
-    if (app.curveBall === true) {
-      app.formation + 2;
-      app.curveBall = false;
-    }
-    else {
-      app.formation++;
-    }
-  }
-  else if (app.formation === 3) {
-    newWall.play();
-    app.walls.push(new Wall({x: 1144.5, y: 375}, {height: 150, width: 768}, '#FE3527', 'left'));
-    app.walls.push(new Wall({x: 487.5, y: 900}, {height: 600, width: 195}, '#FE3527', 'up'));
-    if (app.curveBall === true) {
-      app.formation + 2;
-      app.curveBall = false;
-    }
-    else {
-      app.formation++;
-    }
+    app.walls.push(new Wall({x: 1144.5, y: getRandomCoords('left')}, {height: 150, width: 780}, '#FF4500', 'left'));
   }
   else {
     newWall.play();
-    app.walls.push(new Wall({x: 1144.5, y: 525}, {height: 150, width: 768}, '#FE3527', 'left'));
-    app.walls.push(new Wall({x: 682.5, y: 900}, {height: 600, width: 195}, '#FE3527', 'up'));
-    if (app.curveBall === true) {
-      app.formation = 2;
-      app.curveBall = false;
-    }
-    else {
-      app.formation = 1;
-    }
+    app.walls.push(new Wall({x: getRandomCoords('up'), y: 900}, {height: 600, width: 195}, '#FF4500', 'up'));
   }
 }
 
