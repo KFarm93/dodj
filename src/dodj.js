@@ -1,9 +1,14 @@
+// To-Do's
+// Give user option to rotate player object
+// Implement SQL database integration for registering high-scores
+
+
 // Sound files
 let move = new Audio("../public/move.wav");
 let newWallVerySlow = new Audio("../public/new_wall_vs.wav");
 let newWallSlow = new Audio("../public/new_wall_s.wav");
 let newWallFast = new Audio("../public/new_wall_f.wav");
-let newWallVeryFast = new Audio("../public/new_wall_vf");
+let newWallVeryFast = new Audio("../public/new_wall_vf.wav");
 let death = new Audio("../public/death.wav");
 
 // Classes
@@ -113,7 +118,7 @@ class Game {
     else {
       starColor = "#00FFFF";
     }
-    let newStar = new Star({x: 763, y: Math.random() * 600}, {height: 4, width: 4}, starColor);
+    let newStar = new Star({x: 800, y: Math.random() * 600}, {height: 4, width: 4}, starColor);
     this.stars.push(newStar);
   }
   addStarChance() {
@@ -246,7 +251,7 @@ const frameUpdate = (timeStamp) => {
 }
 
 const addWallChance = () => {
-  if (game.walls.length <= 2) {
+  if (game.walls.length <= 3) {
     addWall();
   }
 }
